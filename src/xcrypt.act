@@ -1,0 +1,136 @@
+"""libxcrypt bindings (bcrypt / MD5 / SHA-256 / SHA-512 crypt)
+
+Exposes bcrypt ("$2a$", "$2b$", "$2y$"), MD5 ("$1$"), SHA-256 ("$5$"), and
+SHA-512 ("$6$") crypt algorithms.
+"""
+
+import testing
+
+# Generic crypt using a full setting string (e.g. "$5$...").
+def crypt(phrase: str, setting: str) -> str:
+    """Compute a crypt hash using the full setting string."""
+    NotImplemented
+
+# C extension functions (implemented in xcrypt.ext.c)
+def _crypt_sha256(phrase: str, salt_or_setting: str, rounds: int) -> str:
+    """Hash using SHA-256 crypt.
+
+    If salt_or_setting already starts with "$5$", it is treated as a full
+    setting string and rounds is ignored.
+    """
+    NotImplemented
+
+def _crypt_sha512(phrase: str, salt_or_setting: str, rounds: int) -> str:
+    """Hash using SHA-512 crypt.
+
+    If salt_or_setting already starts with "$6$", it is treated as a full
+    setting string and rounds is ignored.
+    """
+    NotImplemented
+
+def _gensalt_sha256(rounds: int) -> str:
+    """Generate a SHA-256 setting string. rounds=0 uses libxcrypt defaults."""
+    NotImplemented
+
+def _gensalt_sha512(rounds: int) -> str:
+    """Generate a SHA-512 setting string. rounds=0 uses libxcrypt defaults."""
+    NotImplemented
+
+# MD5 (no rounds parameter supported)
+def _crypt_md5(phrase: str, salt_or_setting: str) -> str:
+    """Hash using MD5 crypt ("$1$")."""
+    NotImplemented
+
+def _gensalt_md5() -> str:
+    """Generate an MD5 setting string."""
+    NotImplemented
+
+# bcrypt (rounds = cost, ident = 2a/2b/2y)
+def _crypt_bcrypt(phrase: str, salt_or_setting: str, rounds: int, ident: str) -> str:
+    """Hash using bcrypt. If salt_or_setting starts with "$2", it is treated as full setting."""
+    NotImplemented
+
+def _gensalt_bcrypt(rounds: int, ident: str) -> str:
+    """Generate a bcrypt setting string. rounds=0 uses libxcrypt defaults."""
+    NotImplemented
+
+# Convenience wrappers with defaults.
+def crypt_sha256(phrase: str, salt_or_setting: str, rounds: int = 0) -> str:
+    return _crypt_sha256(phrase, salt_or_setting, rounds)
+
+def crypt_sha512(phrase: str, salt_or_setting: str, rounds: int = 0) -> str:
+    return _crypt_sha512(phrase, salt_or_setting, rounds)
+
+def gensalt_sha256(rounds: int = 0) -> str:
+    return _gensalt_sha256(rounds)
+
+def gensalt_sha512(rounds: int = 0) -> str:
+    return _gensalt_sha512(rounds)
+
+def crypt_md5(phrase: str, salt_or_setting: str) -> str:
+    return _crypt_md5(phrase, salt_or_setting)
+
+def gensalt_md5() -> str:
+    return _gensalt_md5()
+
+def crypt_bcrypt(phrase: str, salt_or_setting: str, rounds: int = 0, ident: str = "2b") -> str:
+    return _crypt_bcrypt(phrase, salt_or_setting, rounds, ident)
+
+def gensalt_bcrypt(rounds: int = 0, ident: str = "2b") -> str:
+    return _gensalt_bcrypt(rounds, ident)
+
+# Tests
+def _test_sha256_known():
+    phrase = "abc"
+    setting = "$5$saltstring"
+    expected = "$5$saltstring$tDHA0KPsYQ8V.LDB1/fgW7cvROod5ZajSrx1tZU2JG9"
+    testing.assertEqual(crypt(phrase, setting), expected)
+    testing.assertEqual(crypt_sha256(phrase, "saltstring"), expected)
+
+def _test_sha256_rounds_known():
+    phrase = "abc"
+    setting = "$5$rounds=1000$saltstring"
+    expected = "$5$rounds=1000$saltstring$n1MEWFPd1lEE7/KU5DhSUSLK1IJKM0A7BOA1Fk2uBa1"
+    testing.assertEqual(crypt(phrase, setting), expected)
+    testing.assertEqual(crypt_sha256(phrase, "saltstring", 1000), expected)
+
+def _test_sha512_known():
+    phrase = "abc"
+    setting = "$6$saltstring"
+    expected = "$6$saltstring$pClZZISU0lxEwKr1z81EuJdiMLwWncjShXap25hiDGVMnCvlF5zS3ysvBdVRZqPDCdSTj06rwjrLX3bOS1Cak/"
+    testing.assertEqual(crypt(phrase, setting), expected)
+    testing.assertEqual(crypt_sha512(phrase, "saltstring"), expected)
+
+def _test_sha512_rounds_known():
+    phrase = "abc"
+    setting = "$6$rounds=1000$saltstring"
+    expected = "$6$rounds=1000$saltstring$6NXfJcHAqOszRoqrAsiHaMLcALd/df4qk51Md4dEGLXrloQi6cyqUbtHDwWpZDzImbFkZCx2eWVTYIGoe1dJi1"
+    testing.assertEqual(crypt(phrase, setting), expected)
+    testing.assertEqual(crypt_sha512(phrase, "saltstring", 1000), expected)
+
+def _test_gensalt_roundtrip():
+    setting = gensalt_sha256(5000)
+    prefix = "$5$"
+    testing.assertTrue(setting.startswith(prefix))
+    testing.assertTrue(len(setting) > len(prefix))
+    h = crypt("abc", setting)
+    testing.assertTrue(h.startswith(setting))
+
+def _test_md5_known():
+    phrase = "abc"
+    setting = "$1$abcdefgh"
+    expected = "$1$abcdefgh$Kn5qrjcQzV7oAHBJ23Cu3/"
+    testing.assertEqual(crypt(phrase, setting), expected)
+    testing.assertEqual(crypt_md5(phrase, "abcdefgh"), expected)
+
+def _test_bcrypt_known():
+    phrase = "abc"
+    setting = "$2y$04$abcdefghijklmnopqrstuu"
+    expected = "$2y$04$abcdefghijklmnopqrstuuCi15uRb1eH7NAlJ/TgeJertyknQpYn2"
+    testing.assertEqual(crypt(phrase, setting), expected)
+    testing.assertEqual(crypt_bcrypt(phrase, "abcdefghijklmnopqrstuu", 4, "2y"), expected)
+
+def _test_bcrypt_gensalt():
+    setting = gensalt_bcrypt(4, "2y")
+    testing.assertTrue(setting.startswith("$2y$04$"))
+    testing.assertTrue(len(setting) > len("$2y$04$"))

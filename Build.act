@@ -1,7 +1,9 @@
+name = actxcrypt
 
 zig_dependencies = {
   "libxcrypt": (
-        url="https://github.com/orchestron-orchestrator/libxcrypt/archive/e34e0634a7192383dbb4445b6d7568e36baef675.zip",
-        hash="N-V-__8AAF3MIgBALhmET3BNHtaMB4ALx_jKI7qoU9HIH3tb"
+        url="https://github.com/orchestron-orchestrator/libxcrypt/archive/d8cea5a847986eb23c12a66a6a8154c4874785dc.zip",
+        hash="N-V-__8AAPQbIwBgfDhE-5gUH5TCHSlv878nN2iqS-0CEAq1",
+        artifacts=["xcrypt"]
     )
 }
