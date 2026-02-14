@@ -1,5 +1,5 @@
-name = actxcrypt
-
+name = "actxcrypt"
+fingerprint = 0x30f0a703881d8cc5
 zig_dependencies = {
   "libxcrypt": (
         url="https://github.com/orchestron-orchestrator/libxcrypt/archive/d8cea5a847986eb23c12a66a6a8154c4874785dc.zip",
