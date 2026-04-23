@@ -2,7 +2,7 @@ name = "actxcrypt"
 fingerprint = 0x30f0a703881d8cc5
 zig_dependencies = {
   "libxcrypt": (
-        url="https://github.com/orchestron-orchestrator/libxcrypt/archive/65be51f07fad2e64901861ced0aa1bbc38205f5c.zip",
+        url="https://github.com/stratoweave/libxcrypt/archive/65be51f07fad2e64901861ced0aa1bbc38205f5c.zip",
         hash="N-V-__8AAEQcIwDK4P4f8CNps52gVbRPIig7Q0Vk2dP32y9p",
         artifacts=["xcrypt"]
     )
