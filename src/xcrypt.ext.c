@@ -7,27 +7,7 @@
 #include <string.h>
 #include <unistd.h>
 
-// Minimal libxcrypt API declarations to avoid relying on include paths.
-// These values match libxcrypt's crypt.h.
-#define CRYPT_OUTPUT_SIZE 384
-#define CRYPT_MAX_PASSPHRASE_SIZE 512
-#define CRYPT_DATA_RESERVED_SIZE 767
-#define CRYPT_DATA_INTERNAL_SIZE 30720
-#define CRYPT_GENSALT_OUTPUT_SIZE 192
-
-struct crypt_data {
-    char output[CRYPT_OUTPUT_SIZE];
-    char setting[CRYPT_OUTPUT_SIZE];
-    char input[CRYPT_MAX_PASSPHRASE_SIZE];
-    char reserved[CRYPT_DATA_RESERVED_SIZE];
-    char initialized;
-    char internal[CRYPT_DATA_INTERNAL_SIZE];
-};
-
-char *crypt_r(const char *phrase, const char *setting, struct crypt_data *data);
-char *crypt_gensalt_rn(const char *prefix, unsigned long count,
-                       const char *rbytes, int nrbytes,
-                       char *output, int output_size);
+#include <crypt.h>
 
 void xcryptQ___ext_init__() {
     // NOP
@@ -259,4 +239,33 @@ B_str xcryptQ__gensalt_md5() {
 
 B_str xcryptQ_U_10_gensalt_bcrypt(int64_t rounds, B_str ident) {
     return xcrypt__gensalt_bcrypt((long)rounds, (const char *)fromB_str(ident));
+}
+
+// Raw scrypt KDF.  n must be a power of 2 > 1; r * p < 2^30; dklen <= (2^32 - 1) * 32.
+B_bytes xcryptQ_U_18scrypt(B_bytes phrase, B_bytes salt,
+                           int64_t n, int64_t r, int64_t p, int64_t dklen) {
+    if (n < 2 || (n & (n - 1)) != 0) {
+        xcrypt__raise_value_error("scrypt n must be a power of 2 greater than 1");
+    }
+    if (r <= 0 || p <= 0) {
+        xcrypt__raise_value_error("scrypt r and p must be positive");
+    }
+    if ((uint64_t)r * (uint64_t)p >= (1ULL << 30)) {
+        xcrypt__raise_value_error("scrypt requires r * p < 2^30");
+    }
+    if (dklen <= 0) {
+        xcrypt__raise_value_error("scrypt dklen must be positive");
+    }
+
+    uint8_t *out = (uint8_t *)acton_malloc((size_t)dklen);
+    int rc = crypto_scrypt((const uint8_t *)fromB_bytes(phrase), (size_t)phrase->nbytes,
+                           (const uint8_t *)fromB_bytes(salt), (size_t)salt->nbytes,
+                           (uint64_t)n, (uint32_t)r, (uint32_t)p,
+                           out, (size_t)dklen);
+    if (rc != 0) {
+        char buf[128];
+        snprintf(buf, sizeof(buf), "scrypt failed: %s", strerror(errno));
+        xcrypt__raise_value_error(buf);
+    }
+    return to$bytesD_len((char *)out, (int)dklen);
 }

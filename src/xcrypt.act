@@ -1,7 +1,7 @@
-"""libxcrypt bindings (bcrypt / MD5 / SHA-256 / SHA-512 crypt)
+"""libxcrypt bindings (bcrypt / MD5 / SHA-256 / SHA-512 crypt + raw scrypt)
 
 Exposes bcrypt ("$2a$", "$2b$", "$2y$"), MD5 ("$1$"), SHA-256 ("$5$"), and
-SHA-512 ("$6$") crypt algorithms.
+SHA-512 ("$6$") crypt algorithms, plus the raw scrypt KDF.
 """
 
 import testing
@@ -79,6 +79,14 @@ def crypt_bcrypt(phrase: str, salt_or_setting: str, rounds: int = 0, ident: str 
 def gensalt_bcrypt(rounds: int = 0, ident: str = "2b") -> str:
     return _gensalt_bcrypt(rounds, ident)
 
+# scrypt KDF (raw)
+def scrypt(phrase: bytes, salt: bytes, n: int, r: int, p: int, dklen: int) -> bytes:
+    """Compute scrypt(phrase, salt, n, r, p) and return dklen bytes.
+
+    n must be a power of 2 greater than 1. r * p must be < 2^30.
+    """
+    NotImplemented
+
 # Tests
 def _test_sha256_known():
     phrase = "abc"
@@ -134,3 +142,22 @@ def _test_bcrypt_gensalt():
     setting = gensalt_bcrypt(4, "2y")
     testing.assertTrue(setting.startswith("$2y$04$"))
     testing.assertTrue(len(setting) > len("$2y$04$"))
+
+def _test_scrypt_rfc7914():
+    # RFC 7914 §11 first test vector: P="", S="", N=16, r=1, p=1, dkLen=64.
+    out: bytes = scrypt(b"", b"", 16, 1, 1, 64)
+    expected: bytes = b"\x77\xd6\x57\x62\x38\x65\x7b\x20\x3b\x19\xca\x42\xc1\x8a\x04\x97\xf1\x6b\x48\x44\xe3\x07\x4a\xe8\xdf\xdf\xfa\x3f\xed\xe2\x14\x42\xfc\xd0\x06\x9d\xed\x09\x48\xf8\x32\x6a\x75\x3a\x0f\xc8\x1f\x17\xe8\xd3\xe0\xfb\x2e\x0d\x36\x28\xcf\x35\xe2\x0c\x38\xd1\x89\x06"
+    testing.assertEqual(out, expected)
+
+def _test_scrypt_rfc7914_password():
+    # RFC 7914 §11 second test vector: P="password", S="NaCl", N=1024, r=8, p=16, dkLen=64.
+    out: bytes = scrypt(b"password", b"NaCl", 1024, 8, 16, 64)
+    expected: bytes = b"\xfd\xba\xbe\x1c\x9d\x34\x72\x00\x78\x56\xe7\x19\x0d\x01\xe9\xfe\x7c\x6a\xd7\xcb\xc8\x23\x78\x30\xe7\x73\x76\x63\x4b\x37\x31\x62\x2e\xaf\x30\xd9\x2e\x22\xa3\x88\x6f\xf1\x09\x27\x9d\x98\x30\xda\xc7\x27\xaf\xb9\x4a\x83\xee\x6d\x83\x60\xcb\xdf\xa2\xcc\x06\x40"
+    testing.assertEqual(out, expected)
+
+def _test_scrypt_invalid_n():
+    try:
+        _ignored: bytes = scrypt(b"x", b"y", 15, 1, 1, 32)
+        testing.assertTrue(False)
+    except ValueError:
+        pass
