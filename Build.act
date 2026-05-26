@@ -2,8 +2,8 @@ name = "actxcrypt"
 fingerprint = 0x30f0a703881d8cc5
 zig_dependencies = {
   "libxcrypt": (
-        url="https://github.com/stratoweave/libxcrypt/archive/e6b3a4767314396c0d2685a2a7ef99771a7d7535.zip",
-        hash="N-V-__8AAHofIwCR1astPnZTfp-UKPj0DRVS5mzK3-7GEkbG",
+        url="https://github.com/stratoweave/libxcrypt/archive/5d685f8697edcc43aae9f72bcb608a9794ba0a0c.zip",
+        hash="N-V-__8AACYgIwAICe53hip_3TPoRRRbRs4c5oopAlLTdsG7",
         artifacts=["xcrypt"]
     )
 }
