@@ -1,3 +1,11 @@
+.build
+build.zig*
+!deps/libxcrypt/build.zig
+!deps/libxcrypt/build.zig.zon
+.acton.lock
+.actonc.lock
 out
-build.zig
-build.zig.zon
+zig-cache
+.zig-cache
+zig-pkg
+zig-out

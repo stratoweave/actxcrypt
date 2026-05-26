@@ -1,0 +1,18 @@
+.{
+    .name = .libxcrypt,
+    .version = "4.5.0+1",
+    .fingerprint = 0x5471f56884d6149d,
+    .minimum_zig_version = "0.16.0",
+    .dependencies = .{
+        .libxcrypt_upstream = .{
+            .url = "https://github.com/besser82/libxcrypt/archive/refs/tags/v4.5.0.tar.gz",
+            .hash = "N-V-__8AAI4NIwADdwt3CX5kiB66H28ua5C-f5-zFNBoZwJm",
+            .lazy = false,
+        },
+    },
+    .paths = .{
+        "build.zig",
+        "build.zig.zon",
+        "crypt-hashes.h",
+    },
+}
