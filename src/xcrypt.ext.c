@@ -143,7 +143,7 @@ B_str xcryptQ_crypt(B_str phrase, B_str setting) {
     return xcrypt__crypt(phrase_c, setting_c);
 }
 
-B_str xcryptQ_U__crypt_sha256(B_str phrase, B_str salt_or_setting, int64_t rounds) {
+B_str xcryptQ__crypt_sha256(B_str phrase, B_str salt_or_setting, int64_t rounds) {
     char setting_buf[CRYPT_GENSALT_OUTPUT_SIZE];
     const char *setting = xcrypt__build_setting(
         "$5$",
@@ -155,7 +155,7 @@ B_str xcryptQ_U__crypt_sha256(B_str phrase, B_str salt_or_setting, int64_t round
     return xcrypt__crypt((const char *)fromB_str(phrase), setting);
 }
 
-B_str xcryptQ_U_2_crypt_sha512(B_str phrase, B_str salt_or_setting, int64_t rounds) {
+B_str xcryptQ__crypt_sha512(B_str phrase, B_str salt_or_setting, int64_t rounds) {
     char setting_buf[CRYPT_GENSALT_OUTPUT_SIZE];
     const char *setting = xcrypt__build_setting(
         "$6$",
@@ -179,7 +179,7 @@ B_str xcryptQ__crypt_md5(B_str phrase, B_str salt_or_setting) {
     return xcrypt__crypt((const char *)fromB_str(phrase), setting);
 }
 
-B_str xcryptQ_U_8_crypt_bcrypt(B_str phrase, B_str salt_or_setting, int64_t rounds, B_str ident) {
+B_str xcryptQ__crypt_bcrypt(B_str phrase, B_str salt_or_setting, int64_t rounds, B_str ident) {
     char setting_buf[CRYPT_GENSALT_OUTPUT_SIZE];
     const char *setting = xcrypt__build_setting_bcrypt(
         (const char *)fromB_str(salt_or_setting),
@@ -225,11 +225,11 @@ static B_str xcrypt__gensalt(const char *prefix, long rounds) {
     return to$str(result);
 }
 
-B_str xcryptQ_U_4_gensalt_sha256(int64_t rounds) {
+B_str xcryptQ__gensalt_sha256(int64_t rounds) {
     return xcrypt__gensalt("$5$", (long)rounds);
 }
 
-B_str xcryptQ_U_6_gensalt_sha512(int64_t rounds) {
+B_str xcryptQ__gensalt_sha512(int64_t rounds) {
     return xcrypt__gensalt("$6$", (long)rounds);
 }
 
@@ -237,12 +237,12 @@ B_str xcryptQ__gensalt_md5() {
     return xcrypt__gensalt("$1$", 0);
 }
 
-B_str xcryptQ_U_10_gensalt_bcrypt(int64_t rounds, B_str ident) {
+B_str xcryptQ__gensalt_bcrypt(int64_t rounds, B_str ident) {
     return xcrypt__gensalt_bcrypt((long)rounds, (const char *)fromB_str(ident));
 }
 
 // Raw scrypt KDF.  n must be a power of 2 > 1; r * p < 2^30; dklen <= (2^32 - 1) * 32.
-B_bytes xcryptQ_U_18scrypt(B_bytes phrase, B_bytes salt,
+B_bytes xcryptQ_scrypt(B_bytes phrase, B_bytes salt,
                            int64_t n, int64_t r, int64_t p, int64_t dklen) {
     if (n < 2 || (n & (n - 1)) != 0) {
         xcrypt__raise_value_error("scrypt n must be a power of 2 greater than 1");
