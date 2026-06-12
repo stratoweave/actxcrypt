@@ -11,7 +11,7 @@ def crypt(phrase: str, setting: str) -> str:
     """Compute a crypt hash using the full setting string."""
     NotImplemented
 
-# C extension functions (implemented in xcrypt.ext.c)
+# C extension functions (implemented in lib.ext.c)
 def _crypt_sha256(phrase: str, salt_or_setting: str, rounds: int) -> str:
     """Hash using SHA-256 crypt.
 

@@ -1,5 +1,5 @@
-name = "actxcrypt"
-fingerprint = 0x30f0a703881d8cc5
+name = "xcrypt"
+fingerprint = 0x6a60d48966774bfd
 zig_dependencies = {
     "libxcrypt": (
         path="deps/libxcrypt",
